@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="scripts/axios.min.js"></script>
+    <script src="scripts/index.global.min.js"></script>
+    <title>API</title>
+</head>
+
+<body>
+    <input type="text" id="title" placeholder="כותרת האירוע">
+    <input type="date" id="date">
+    <button id="add" onclick="addEvent()">הוספה</button>
+    <div id="list"> </div>
+
+    <button id="delete">מחיקה</button>
+    <button id="update" onclick="updateEvent()">עדכון</button>
+    <div id="calendar"></div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            axios.get("https://eventsapi.onrender.com/api/Events").then(c => {
+                var calendarEl = document.getElementById("calendar");
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: "dayGridMonth",
+                    events: c.data
+                });
+                for (let i = 0; i < 2; i++) {
+                    let element = document.createElement("input");
+                    element.type = "radio";
+                    element.id =  i;
+                    element.name = "options";
+                    let label = document.createElement("label");
+                    label.htmlFor =  i;
+                    document.querySelector("#list").appendChild(element);
+                    document.querySelector("#list").appendChild(label);
+                    label.innerHTML = c.data[i];
+                    element.addEventListener("click", function () {
+                        document.querySelector("#title").value = c.data[i].title;
+                        document.querySelector("#date").valueAsDate =  new Date(c.data[i].start);
+                    });
+                }
+                calendar.render();
+            });
+        });
+
+        function addEvent() {
+            axios.post("https://eventsapi.onrender.com/api/Events", {
+                "title": document.getElementById("title").value,
+                "start": document.getElementById("date").valueAsDate
+            });
+            location.reload();
+        }
+
+        function updateEvent() {
+
+
+            location.reload();
+        }
+
+        function deleteEvent() {
+            let id= event.target.id;
+            axios.delete(`https://eventsapi.onrender.com/api/Events/${id}`).then(()=>{
+                location.reload();
+            });
+           
+        }
+
+    </script>
+</body>
+
+</html>
